@@ -1,0 +1,23 @@
+# see
+# https://cs.anu.edu.au/courses/comp2300/assignments/01-synth/#statement-of-originality
+# for details
+
+declaration: >-
+  I declare that apart from the collaborators everything I have submitted in this assignment is entirely my
+  own work, with the following exceptions:
+
+name:
+uid:
+
+# add as many "name+comment" entries as necessary
+collaboration:
+  - name:
+    comment: >-
+      
+
+# add as many "url+licence+comment" entries as necessary
+code:
+  - comment:
+    url:
+    licence:
+
