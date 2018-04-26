@@ -37,7 +37,11 @@
 
     udiv r1, r1, r10 @@r8 stores x value to increment by
 
+    push {lr}
+
     bl checkloop
+
+    pop {lr}
 
     subs r8, 1
 
@@ -53,15 +57,88 @@ main:
   bl init
 
 loop:
-  mov r4, 440 
-  mov r5, #12000
-  generator r4, r5
-  mov r4, 1 
-  mov r5, #24000
-  generator r4, r5
-  mov r4, 440 
-  mov r5, #48000
-  generator r4, r5
+
+@@ structure:
+@@ bl [amount of time you want the next note to play for]
+@@ bl [next note]
+
+@@ alternatively:
+@@ mov r4, frequency of note
+@@ mov r5, [(48000*time)] i.e 48000 * 0.25 = 12000 therefore mov r5, #12000
+@@ generator r4, r5
+
+  bl quartersecond  @@ a quarter second OF
+  bl fourforty      @@ a 440 hz note
+
+  bl halfsecond     @@ a half second OF
+  bl silence        @@ silence
+
+  bl quartersecond
+  bl fivetwentythree
+
+  bl halfsecond
+  bl silence
+
+  bl quartersecond
+  bl fourforty
+
+  bl quartersecond
+  bl silence
+
+  bl quartersecond
+  bl fourforty
+
+  bl halfsecond
+  bl silence
+  
+  bl quartersecond
+  bl fivetwentythree
+
+  bl halfsecond
+  bl silence
+
+  bl quartersecond
+  bl fourforty
+
+  bl quartersecond
+  bl silence
+
+  bl quartersecond
+  bl fourforty
+  
+  bl halfsecond
+  bl silence
+
+  bl quartersecond
+  bl fivetwentythree
+
+  bl halfsecond
+  bl silence
+
+  bl quartersecond
+  bl fourforty
+
+  bl quartersecond
+  bl silence
+
+  bl quartersecond
+  bl fourninetyfour
+
+  bl halfsecond
+  bl silence
+
+  bl quartersecond
+  bl fourforty
+
+  bl halfsecond
+  bl silence
+
+  bl quartersecond
+  bl threeninetytwo
+
+  bl quartersecond
+  bl silence
+
   b loop
 
 checkloop:
@@ -72,6 +149,45 @@ checkloop:
   mov r0, r6
   subs r10, 1
   bne checkloop
+  bx lr
+
+
+
+@@ timings
+
+quartersecond:
+  mov r5, #12000
+  bx lr
+
+halfsecond:
+  mov r5, #24000
+  bx lr  
+
+@@ frequencies
+
+fourforty:
+  mov r4, 440 
+  generator r4, r5
+  bx lr
+
+fivetwentythree:
+  mov r4, 523
+  generator r4, r5
+  bx lr
+
+fourninetyfour:
+  mov r4, 494
+  generator r4, r5
+  bx lr
+
+threeninetytwo:
+  mov r4, 392
+  generator r4, r5
+  bx lr
+
+silence:
+  mov r4, 1 
+  generator r4, r5
   bx lr
 
 .size main, .-main 
