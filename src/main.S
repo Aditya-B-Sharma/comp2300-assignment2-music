@@ -9,7 +9,7 @@
   
   mov r0, 0
 
-  mov r10, #48000             @@ r10 stores n value for amount of times to increment where n = 48000 / frequency = total hertz / frequency = amount of increments for peak to peak amplitude
+  mov r10, #48000             @@ r10 stores n value for amount of times to increment where n   =   48000 / frequency     =     total hertz / frequency   =   amount of increments for peak to peak amplitude
   udiv r10, r10, \freq 
   mov r7, r10                 @@ we store the r10 value in r7 as r10 will decrement when the shape is created, and we need to use that value again
   b normal\@                
