@@ -2,60 +2,55 @@
 .global main
 .type main, %function
 
-@ for details on how this assignment template works, see
-@ https://cs.anu.edu.au/courses/comp2300/assignments/01-synth/#getting-started
-
-.macro generator freq amount
-@@freq = r4 amount = r5
-  mov r0, \freq
+.macro generator freq amount   @@ define a macro that takes in two arguments, frequency and amount of time to play it for
+  mov r0, \freq                @@ we put the freqeuency is r0 to compare, this is mainly for silence (if 1 is input as frequency it will play silence)
   cmp r0, 1
   beq zero\@
   
   mov r0, 0
 
-  mov r10, #48000 @@8 @#48000 hz
-  udiv r10, r10, \freq @@r9 stores n value for amount of times to increment 
-  mov r7, r10
-  b normal\@
+  mov r10, #48000             @@ r10 stores n value for amount of times to increment where n = 48000 / frequency = total hertz / frequency = amount of increments for peak to peak amplitude
+  udiv r10, r10, \freq 
+  mov r7, r10                 @@ we store the r10 value in r7 as r10 will decrement when the shape is created, and we need to use that value again
+  b normal\@                
 
-  zero\@:
+  zero\@:                     @@ if silence is to be played, we set r10 to 1 so we can just make a 1-point wave
   mov r0, 0
 
   mov r10, 1
   mov r7, r10
 
-  normal\@:
-  
+  normal\@:                   @@ the length of time we want to play something / amount of times we must increment = the amount of times we must play a shape (i.e triangle) to keep it going for x time
+                              @@ we store this in r8
   mov r9, \amount
   udiv r8, r9, r10
 
-  calltimes\@:
+  calltimes\@:                @@ this will repeat until r8 = 0 meaning we have make our required amount of shapes
 
-    mov r0, 0xaad8
+    mov r0, 0xaad8            @@ lower bound of the amplitude
 
-    mov r1, #43600 @@4 @#43600
+    mov r1, #43600            @@ the total amplitude
     
+    udiv r1, r1, r10          @@ as r10 stored the amount of increments needed to make a shape, 
+                              @@ total amplitude / r10 = value per increment
 
-    udiv r1, r1, r10 @@r8 stores x value to increment by
-
-    push {lr}
-
+    push {lr}                 @@ push and pop lr as we will be using bl in checkloop to play the sample
     bl checkloop
-
     pop {lr}
 
-    subs r8, 1
+    subs r8, 1                @@ decrement the amount of times a shape has been played until the required amount of time has been reached
 
-    mov r10, r7
+    mov r10, r7               @@ as checkloop resets r10 to 0, we must set it back to our required n amount of increments
 
-    mov r6, 0
-
-    bne calltimes\@
+    mov r6, 0                 @@ checkloop also changes r6 and since checkloop requires it to be 0 we must reset
+ 
+    bne calltimes\@           @@ go through this label again if we havent reached our play amount (time)
 
 .endm
 
 main:
-  bl init
+  bl init                     @@ initialise audio 
+
 
 loop:
 
@@ -98,9 +93,9 @@ loop:
   bl halfsecond
   bl silence
 
-  bl quartersecond
+  bl quartersecond                                               
   bl fourforty
-
+ 
   bl quartersecond
   bl silence
 
@@ -134,27 +129,29 @@ loop:
   bl halfsecond
   bl silence
 
-  bl quartersecond
-  bl threeninetytwo
+  bl quartersecond                                 @@ ~The club isnt the best place to find a lover so the bar is where I go
+  bl threeninetytwo 
 
   bl quartersecond
   bl silence
 
-  b loop
 
-checkloop:
-  add r6, r0, r1
-  push {lr}
+  b loop                                           @@ repeat
+
+
+checkloop:                                         @@ our main label which makes the sawtooth shape, r0 is set to our required sample
+  add r6, r0, r1                                   @@ r6 holds lower bound of amplitude + increment amount
+  push {lr}                                        @@ push and pop lr just in case it gets used in BSP
   bl BSP_AUDIO_OUT_Play_Sample
   pop {lr}
-  mov r0, r6
-  subs r10, 1
-  bne checkloop
-  bx lr
-
+  mov r0, r6                                       @@ now we set r0 to r6 since the amplitude - increment was previously played
+  subs r10, 1                                      @@ decrement from our n increment counter
+  bne checkloop                                    @@ if we havent reached our upper peak of amplitude, keep rising
+  bx lr                                            @@ branch back otherwise
 
 
 @@ timings
+@@ alternate structure to reduce repeatability
 
 quartersecond:
   mov r5, #12000
@@ -165,6 +162,7 @@ halfsecond:
   bx lr  
 
 @@ frequencies
+@@ alternate structure to reduce repeatability, so we can simple play the frequency we want
 
 fourforty:
   mov r4, 440 
