@@ -9,7 +9,7 @@
   
   mov r0, 0
 
-  mov r10, #48000             @@ r9 stores n value for amount of times to increment where n = 48000 / frequency = total hertz / frequency = increments for peak to peak amplitude
+  mov r10, #48000             @@ r10 stores n value for amount of times to increment where n = 48000 / frequency = total hertz / frequency = amount of increments for peak to peak amplitude
   udiv r10, r10, \freq 
   mov r7, r10                 @@ we store the r10 value in r7 as r10 will decrement when the shape is created, and we need to use that value again
   b normal\@                
@@ -31,27 +31,25 @@
 
     mov r1, #43600            @@ the total amplitude
     
+    udiv r1, r1, r10          @@ as r10 stored the amount of increments needed to make a shape, 
+                              @@ total amplitude / r10 = value per increment
 
-    udiv r1, r1, r10 @@r8 stores x value to increment by
-
-    push {lr}
-
+    push {lr}                 @@ push and pop lr as we will be using bl in checkloop to play the sample
     bl checkloop
-
     pop {lr}
 
-    subs r8, 1
+    subs r8, 1                @@ decrement the amount of times a shape has been played until the required amount of time has been reached
 
-    mov r10, r7
+    mov r10, r7               @@ as checkloop resets r10 to 0, we must set it back to our required n amount of increments
 
-    mov r6, 0
-
-    bne calltimes\@
+    mov r6, 0                 @@ checkloop also changes r6 and since checkloop requires it to be 0 we must reset
+ 
+    bne calltimes\@           @@ go through this label again if we havent reached our play amount (time)
 
 .endm
 
 main:
-  bl init
+  bl init                     @@ initialise audio 
 
 loop:
 
@@ -64,13 +62,13 @@ loop:
 @@ mov r5, [(48000*time)] i.e 48000 * 0.25 = 12000 therefore mov r5, #12000
 @@ generator r4, r5
 
-  bl quartersecond  @@ a quarter second OF
+  bl quartersecond       @@ a quarter second OF
   bl fiveeightseven      @@ a 440 hz note
 
-  bl quartersecond     @@ a half second OF
-  bl fourforty        @@ silence
+  bl quartersecond       @@ a half second OF
+  bl fourforty           @@ silence
 
-  bl quartersecond
+  bl quartersecond      
   bl fiveeightseven
 
   bl halfsecond
@@ -88,8 +86,8 @@ loop:
   bl fullsecond
   bl fivefivefour
 
-  bl inkling
-  bl silence
+  bl inkling            @@ a 1/48 second of
+  bl silence            @@ silence
 
 
   bl quartersecond  
@@ -134,8 +132,8 @@ loop:
   bl eighteighty
 
   bl halfsecond
-  bl seveneightyfour
-
+  bl seveneightyfour                                                             @@ Pokemon Center Theme @@
+                                                                                 @@   RIP Satoru Iwata   @@
   bl quartersecond
   bl sevenforty
 
@@ -287,23 +285,25 @@ loop:
   bl inkling
   bl silence
 
-  b loop
+  b loop                                           @@ repeat
 
-checkloop:
-  add r6, r0, r1
-  push {lr}
+
+checkloop:                                         @@ our main label which makes the sawtooth shape, r0 is set to our required sample
+  add r6, r0, r1                                   @@ r6 holds lower bound of amplitude + increment amount
+  push {lr}                                        @@ push and pop lr just in case it gets used in BSP
   bl BSP_AUDIO_OUT_Play_Sample
   pop {lr}
-  mov r0, r6
-  subs r10, 1
-  bne checkloop
-  bx lr
+  mov r0, r6                                       @@ now we set r0 to r6 since the amplitude - increment was previously played
+  subs r10, 1                                      @@ decrement from our n increment counter
+  bne checkloop                                    @@ if we havent reached our upper peak of amplitude, keep rising
+  bx lr                                            @@ branch back otherwise
 
 
 
 @@ timings
+@@ alternate structure to reduce repeatability
 
-inkling:
+inkling:           
   mov r5, #1000
   bx lr 
 
@@ -321,6 +321,7 @@ fullsecond:
  
 
 @@ frequencies
+@@ alternate structure to reduce repeatability, so we can simple play the frequency we want
 
 fourforty:
   mov r4, 440 
@@ -362,8 +363,13 @@ nineeightyseven:
   generator r4, r5
   bx lr
 
+silence:
+  mov r4, 1 
+  generator r4, r5
+  bx lr
 
-  /*
+  /* frequencies for notes
+     timing done by ear
 587
 440
 587
@@ -372,8 +378,6 @@ nineeightyseven:
 740
 659
 554
-
-
 
 554
 440
@@ -434,27 +438,5 @@ nineeightyseven:
 740
 659
 587
-
 */
-
-fivetwentythree:
-  mov r4, 523
-  generator r4, r5
-  bx lr
-
-fourninetyfour:
-  mov r4, 494
-  generator r4, r5
-  bx lr
-
-threeninetytwo:
-  mov r4, 392
-  generator r4, r5
-  bx lr
-
-silence:
-  mov r4, 1 
-  generator r4, r5
-  bx lr
-
 .size main, .-main 
