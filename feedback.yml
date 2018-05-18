@@ -1,0 +1,24 @@
+mark: 40
+
+feedback:
+  well_done: >-
+    The general explanation is pretty good, but the abstraction is too low.
+
+  suggestions: >-
+    Please fill out the SoO correctly by writing NA / deleting unused sections.
+
+    Centre aligned documents aren't great for professional / academic purposes, 
+    use left align or justify.
+
+    A function would have been a better idea than a macro. Using a macro for large 
+    amounts of code is generally a bad idea.
+
+    "This is equal to total hertz / frequency", total hertz means nothing, you are looking 
+    for 'sample rate'.
+
+    You're talking a bit too close to code, there is no real need to mention registers 
+    unless you are explaining a tricky function or stack interaction.
+
+
+
+
